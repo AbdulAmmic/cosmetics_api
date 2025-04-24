@@ -1,0 +1,290 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = "mongodb+srv://imlux:2AedLqoPRNFdTtp1@cluster0.wdkdpl1.mongodb.net/imlux?retryWrites=true&w=majority&appName=Cluster0"
+}
+
+model User {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  email String
+  role String
+  password String
+  createdAt DateTime @default(now())
+  bussinessId String? @db.ObjectId
+  bussiness Bussiness? @relation(fields: [bussinessId], references: [id], onDelete: Cascade)
+  shopId String? @db.ObjectId
+  shop Shop? @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+
+  sent Message[] @relation(name: "sender")
+
+  recieved Message[]
+}
+
+
+
+model Bussiness {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  email String
+  createdAt DateTime @default(now())
+  users User[]
+  Shop Shop[]
+  Items Items[]
+  Invoice Invoice[]
+
+  Services Services[]
+}
+
+
+model Shop {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  createdAt DateTime @default(now())
+  bussinessId String? @db.ObjectId
+  bussiness Bussiness? @relation(fields: [bussinessId], references: [id], onDelete: Cascade)
+  User User[]
+  Items Items[]
+  Invoice Invoice[]
+
+  Services Services[]
+
+  Requests Requests[]
+}
+
+
+model Items {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String?
+  barCode String?
+  createdAt DateTime @default(now())
+  shopId String? @db.ObjectId
+  shop Shop? @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bussinessId String? @db.ObjectId
+  bussiness Bussiness? @relation(fields: [bussinessId], references: [id], onDelete: Cascade)
+  cost Float?
+  price Float?
+  quantity Float?
+  sku String?
+  categoryID String? @db.ObjectId
+  category  Category? @relation(fields: [categoryID], references: [id], onDelete: Cascade)
+  brand String?
+  expiryDate DateTime?
+  description String?
+  tags String[]
+  unit String?
+  image String?
+  reorderQuantity Int?
+  discountEnabled Boolean? @default(false)
+  discountPercentage Float?
+  supplierID String? @db.ObjectId
+  supplier Supplier? @relation(fields: [supplierID], references: [id], onDelete: Cascade)
+  
+}
+model Supplier {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  contact String
+  accountNumber String[]
+  bank String[]
+  accountName String[]
+  items Items[]
+  address String
+  balance String
+  status String
+
+  Requests Requests[]
+}
+
+model Category {
+  id  String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  description String
+  items Items[]
+}
+
+model Sales {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  createdAt DateTime @default(now())
+  invoiceId String? @db.ObjectId
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  total Float
+  }
+
+model Invoice {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  createdAt DateTime @default(now())
+  items String[]
+  quantities Float[]
+  prices Float[]
+  bussinessId String? @db.ObjectId
+  bussiness Bussiness? @relation(fields: [bussinessId], references: [id], onDelete: Cascade)
+  shopId String? @db.ObjectId
+  shop Shop? @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  totalPrice Float
+  totalCost Float
+  Sales Sales[]
+  paymentType String
+  customerId String? @db.ObjectId
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  status String?
+  userId String? @db.ObjectId
+  // user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+model Customer {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  contact String
+  walletBalance Float
+  email String?
+  Invoice Invoice[]
+  serviceId String? @db.ObjectId
+  service Services? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  Result Result[]
+  type String
+  code String?
+
+  // Tests Tests[]
+
+  TestRecord TestRecord[]
+}
+
+
+model Services {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  description String
+  price Float
+  Customer Customer[]
+  bussinessId String? @db.ObjectId
+  bussiness Bussiness? @relation(fields: [bussinessId], references: [id], onDelete: Cascade)
+  shopId String? @db.ObjectId
+  shop Shop? @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  Result Result[]
+}
+
+model Result {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  date DateTime @default(now())
+  serviceId String @db.ObjectId
+  service Services? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  customerId String? @db.ObjectId
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+
+model Project {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  title String
+  description String
+  originalBudget Float
+  currentBalance Float
+  startDate DateTime
+  endDate DateTime
+  status String
+
+  Task Task[]
+
+  Worker Worker[]
+}
+
+
+
+
+model Task {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  title String
+  description String
+  projectID String? @db.ObjectId
+  project Project? @relation(fields: [projectID], references: [id], onDelete: Cascade)
+  price Float
+  workerId String @db.ObjectId
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  startDate DateTime
+  endDate DateTime
+}
+
+model Worker {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  email String
+  projectID String? @db.ObjectId
+  project Project? @relation(fields: [projectID], references: [id], onDelete: Cascade)
+  Task Task[]
+}
+
+
+model Liability {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  description String
+  amount Float
+}
+
+model Expenses {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  name String
+  description String
+  amount Float
+  date DateTime?
+}
+
+model Requests {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  product String
+  quantity Int
+  supplierId String? @db.ObjectId
+  supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  shopId String? @db.ObjectId
+  shop Shop? @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  status String
+  date DateTime
+}
+
+model TestRecord {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  // name String
+  status String @default("Pending")
+  customerId String? @db.ObjectId
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  testCode String?
+  // category String
+  price String
+  tests String[]
+  date DateTime @default(now())
+  
+}
+
+model Tests {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  title String
+  category String
+  price String
+  
+
+}
+
+
+model Message {
+  id String @id @db.ObjectId @default(auto()) @map("_id")
+  subject String
+  message String
+  date DateTime @default(now())
+  senderId String? @db.ObjectId
+  sender User? @relation(name: "sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String? @db.ObjectId
+  receiver User? @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+}
+

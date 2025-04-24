@@ -1,0 +1,23 @@
+
+***************************UPGRADES**************************
+1. Send mail to Customers notifying them of incoming products
+
+***************************TODOS*****************************
+1. Suppliers & Requests
+2. Liabilities
+3. Expenses
+4. AI
+5. Reports
+6. Laboratory
+7. Mail
+8. Segregation of Users
+9. PMS
+
+
+
+***********************Laboratory************************
+1. Take a test
+2. Update test
+3. View Results
+4. View Tests
+
