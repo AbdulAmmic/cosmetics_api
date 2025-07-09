@@ -48,10 +48,6 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         body.password = (Math.floor(Math.random() * 90000000) + 10000000).toString(); //Random 8 digits
         // Hash the password
         const hashedPassword = yield bcryptjs_1.default.hash(body.password, 10);
-        body.shop = { connect: { id: body.shopId } };
-        body.bussiness = { connect: { id: body.bussinessId } };
-        delete body.shopId;
-        delete body.bussinessId;
         // Check if email already exists
         const sameemail = yield prismaClient_1.prisma.user.findFirst({ where: { email: body.email } });
         if (sameemail) {
