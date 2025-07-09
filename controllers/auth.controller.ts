@@ -39,14 +39,10 @@ export const register = async (req: RequestType, res: Response) => {
         body.password =( Math.floor(Math.random() * 90000000) + 10000000).toString(); //Random 8 digits
         // Hash the password
         const hashedPassword = await bcrypt.hash(body.password, 10);
-        if (body.bussinessId){
-            body.shop = {connect: {id: body.shopId}}
-            body.bussiness = {connect: {id: body.bussinessId}};
-        }
+     
        
 
-        delete body.shopId;
-        delete body.bussinessId;
+        
 
         // Check if email already exists
         const sameemail = await prisma.user.findFirst({ where: { email: body.email } });
