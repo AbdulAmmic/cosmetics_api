@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = "mongodb+srv://ammuhammad7535:MnXSU60ik3BqTr1H@ammic.md1f4nt.mongodb.net/?retryWrites=true&w=majority&appName=ammic"
+  url      = "mongodb+srv://ammuhammad7535:MnXSU60ik3BqTr1H@ammic.md1f4nt.mongodb.net/cosmetics?retryWrites=true&w=majority&appName=ammic"
 }
 
 model User {
