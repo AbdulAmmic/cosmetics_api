@@ -18,7 +18,10 @@ const multer_1 = __importDefault(require("multer"));
 const xlsx_1 = __importDefault(require("xlsx"));
 // Configure multer to store files in memory
 const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage() });
+<<<<<<< HEAD
 // rgeeeteg
+=======
+>>>>>>> 8245b4cea1ffefdcb6137955deaf1a71183edae3
 function excelDateToJSDate(serial) {
     const excelBaseDate = new Date(1899, 11, 30);
     const daysToMilliseconds = serial * 24 * 60 * 60 * 1000;
@@ -30,11 +33,20 @@ const bulkUploadProducts = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return res.status(400).json({ error: 'Please upload an Excel file' });
         }
         const { shop_id } = req.body;
+<<<<<<< HEAD
+=======
+        // Read the uploaded Excel file from the buffer
+>>>>>>> 8245b4cea1ffefdcb6137955deaf1a71183edae3
         const workbook = xlsx_1.default.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const data = xlsx_1.default.utils.sheet_to_json(worksheet);
+<<<<<<< HEAD
         const products = data.map((item, index) => {
+=======
+        // Map the data to the required format
+        const products = data.map((item) => {
+>>>>>>> 8245b4cea1ffefdcb6137955deaf1a71183edae3
             var _a;
             let expiryDate = null;
             if (item['Expiry Date']) {
@@ -46,11 +58,16 @@ const bulkUploadProducts = (req, res) => __awaiter(void 0, void 0, void 0, funct
             if (!expiryDate || isNaN(expiryDate.getTime())) {
                 const futureDate = new Date();
                 futureDate.setFullYear(new Date().getFullYear() + 1);
+<<<<<<< HEAD
                 expiryDate = futureDate;
+=======
+                expiryDate = futureDate; // Keep it as a Date object
+>>>>>>> 8245b4cea1ffefdcb6137955deaf1a71183edae3
             }
             return {
                 name: item['Item Name'],
                 categoryID: item.CategoryID,
+<<<<<<< HEAD
                 quantity: parseInt(item.Quantity) || 0,
                 cost: parseFloat(item['Cost Price']) || 0,
                 price: parseFloat(item['Sale Price']) || 0,
@@ -69,11 +86,31 @@ const bulkUploadProducts = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!filteredProducts.length) {
             return res.status(400).json({ error: 'No valid products found in file' });
         }
+=======
+                quantity: item.Quantity ? parseInt(item.Quantity) : 0,
+                cost: item['Cost Price'] ? parseFloat(item['Cost Price']) : 0,
+                price: item['Sale Price'] ? parseFloat(item['Sale Price']) : 0,
+                barCode: String(data.indexOf(item) + 1),
+                sku: ((_a = item.SKU) === null || _a === void 0 ? void 0 : _a.toString()) ? item.SKU.toString() : String(data.indexOf(item) + 1),
+                description: item.Description ? item.Description : "",
+                reorderQuantity: item['Reorder Quantity'] ? item['Reorder Quantity'] : 0,
+                brand: item.Brand ? item.Brand : item['Item Name'],
+                unit: item.Unit ? item.unit : "null",
+                discountPercentage: item.Discount,
+                expiryDate: null,
+                shopId: shop_id
+                // Convert to ISO string for Prisma
+            };
+        });
+        const filteredProducts = products.filter((product) => product.name !== null);
+        // Insert the products into the database
+>>>>>>> 8245b4cea1ffefdcb6137955deaf1a71183edae3
         const createdProducts = yield prismaClient_1.prisma.items.createMany({
             data: filteredProducts,
         });
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         res.setHeader('Access-Control-Allow-Origin', '*');
+<<<<<<< HEAD
         res.status(201).json({
             message: 'Products uploaded successfully',
             createdCount: createdProducts.count,
@@ -82,6 +119,13 @@ const bulkUploadProducts = (req, res) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         console.error('Failed to upload products:', error);
         res.status(500).json({ error: 'Failed to upload products', message: error });
+=======
+        res.status(201).json({ message: 'Products uploaded successfully', createdProducts });
+    }
+    catch (error) {
+        console.error('Failed to upload products:', error);
+        res.status(500).json({ error: 'Failed to upload products' });
+>>>>>>> 8245b4cea1ffefdcb6137955deaf1a71183edae3
     }
 });
 exports.bulkUploadProducts = bulkUploadProducts;
