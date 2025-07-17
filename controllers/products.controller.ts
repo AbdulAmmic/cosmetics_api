@@ -83,7 +83,7 @@ export const bulkUploadProducts = async (req: RequestType, res: Response) => {
     });
   } catch (error) {
     console.error('Failed to upload products:', error);
-    res.status(500).json({ error: 'Failed to upload products' });
+    res.status(500).json({ error: 'Failed to upload products', message: error });
   }
 };
 
