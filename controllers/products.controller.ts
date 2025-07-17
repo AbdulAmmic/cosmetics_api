@@ -21,17 +21,16 @@ export const bulkUploadProducts = async (req: RequestType, res: Response) => {
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload an Excel file' });
     }
-    const {shop_id} = req.body;
 
-    // Read the uploaded Excel file from the buffer
+    const { shop_id } = req.body;
+
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data: any[] = XLSX.utils.sheet_to_json(worksheet);
 
-    // Map the data to the required format
-    const products = data.map((item) => {
-      let expiryDate:any = null;
+    const products = data.map((item, index) => {
+      let expiryDate: Date | null = null;
 
       if (item['Expiry Date']) {
         const parsedDate = new Date(`01/${item['Expiry Date']}`);
@@ -43,38 +42,45 @@ export const bulkUploadProducts = async (req: RequestType, res: Response) => {
       if (!expiryDate || isNaN(expiryDate.getTime())) {
         const futureDate = new Date();
         futureDate.setFullYear(new Date().getFullYear() + 1);
-        expiryDate = futureDate; // Keep it as a Date object
+        expiryDate = futureDate;
       }
 
       return {
         name: item['Item Name'],
-        categoryID: item.CategoryID,
-        quantity: item.Quantity ? parseInt(item.Quantity) : 0,
-        cost: item['Cost Price'] ? parseFloat(item['Cost Price']) : 0,
-        price: item['Sale Price'] ? parseFloat(item['Sale Price']) : 0,
-        barCode: String(data.indexOf(item) + 1),
-        sku: item.SKU?.toString() ? item.SKU.toString() : String(data.indexOf(item) + 1),
-        description: item.Description ? item.Description : "",
-        reorderQuantity: item['Reorder Quantity'] ? item['Reorder Quantity'] : 0,
-        brand: item.Brand ? item.Brand : item['Item Name'],
-        unit: item.Unit ? item.unit : "null",
-        discountPercentage: item.Discount,
-        expiryDate: null as any,
-        shopId: shop_id
-         // Convert to ISO string for Prisma
+        categoryID: parseInt(item.CategoryID) || 0,
+        quantity: parseInt(item.Quantity) || 0,
+        cost: parseFloat(item['Cost Price']) || 0,
+        price: parseFloat(item['Sale Price']) || 0,
+        barCode: String(index + 1),
+        sku: item.SKU?.toString() || String(index + 1),
+        description: item.Description || '',
+        reorderQuantity: parseInt(item['Reorder Quantity']) || 0,
+        brand: item.Brand || item['Item Name'],
+        unit: item.Unit || 'null',
+        discountPercentage: parseFloat(item.Discount) || 0,
+        expiryDate,
+        shopId: parseInt(shop_id),
       };
     });
 
-    const filteredProducts = products.filter((product) => product.name !== null);
+    const filteredProducts = products.filter((product) => !!product.name);
 
-    // Insert the products into the database
+    if (!filteredProducts.length) {
+      return res.status(400).json({ error: 'No valid products found in file' });
+    }
+
     const createdProducts = await prisma.items.createMany({
       data: filteredProducts,
+      skipDuplicates: false, // Helps track errors
     });
 
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(201).json({ message: 'Products uploaded successfully', createdProducts });
+
+    res.status(201).json({
+      message: 'Products uploaded successfully',
+      createdCount: createdProducts.count,
+    });
   } catch (error) {
     console.error('Failed to upload products:', error);
     res.status(500).json({ error: 'Failed to upload products' });
