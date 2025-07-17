@@ -81,7 +81,7 @@ const bulkUploadProducts = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
     catch (error) {
         console.error('Failed to upload products:', error);
-        res.status(500).json({ error: 'Failed to uplad products', message: error });
+        res.status(500).json({ error: 'Failed to  products', message: error });
     }
 });
 exports.bulkUploadProducts = bulkUploadProducts;
